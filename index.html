@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NXT365 | Predictive Year Logic</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/n.ico">
+
     <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#080808">
-    <link rel="icon" type="image/jpeg" href="logo.jpg">
-    <link rel="apple-touch-icon" href="logo.jpg">
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk5YVDM2NSBQcmVkaWN0aW9uIEVuZ2luZSIsCiAgInNob3J0X25hbWUiOiAiTlhUMzY1IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwODA4MDgiLAogICJ0aGVtZV9jb2xvciI6ICIjMDgwODA4IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAibG9nby5qcGciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL2pwZWciCiAgICB9CiAgXQp9">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk5YVDM2NSBQcmVkaWN0aW9uIEVuZ2luZSIsCiAgInNob3J0X25hbWUiOiAiTlhUMzY1IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwODA4MDgiLAogICJ0aGVtZV9jb2xvciI6ICIjMDgwODA4Igp9">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
@@ -55,16 +56,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 1.5s cubic-bezier(0.8, 0, 0.2, 1);
         }
 
         .loader-bar {
-            width: 100px;
+            width: 120px;
             height: 1px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
             position: relative;
             overflow: hidden;
-            margin-top: 20px;
+            margin-top: 24px;
         }
 
         .loader-fill {
@@ -72,7 +73,8 @@
             height: 100%;
             width: 0%;
             background: #fff;
-            animation: load 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+            animation: load 3s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+            box-shadow: 0 0 20px #fff;
         }
 
         @keyframes load {
@@ -85,13 +87,15 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 40px 100px rgba(0,0,0,0.8);
             opacity: 0;
-            transform: scale(0.95);
-            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(40px) scale(0.96);
+            filter: blur(15px);
+            transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .app-loaded .glass-card {
             opacity: 1;
-            transform: scale(1);
+            transform: translateY(0) scale(1);
+            filter: blur(0);
         }
 
         .input-heavy {
@@ -122,6 +126,8 @@
             background: rgba(255,255,255,0.05);
             top: 0;
             animation: scan 3s linear infinite;
+            pointer-events: none;
+            z-index: 50;
         }
 
         @keyframes scan {
@@ -140,22 +146,32 @@
         @keyframes shine {
             to { background-position: 200% center; }
         }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.5) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <!-- Cinematic Loader -->
     <div id="preloader">
+        <img src="assets/logo.jpg" alt="Logo" class="w-12 h-12 mb-4 opacity-0 transition-opacity duration-1000" id="loader-logo" style="filter: grayscale(1) invert(1);">
         <div class="mono text-[10px] tracking-[0.6em] uppercase opacity-40">Initializing NXT365</div>
         <div class="loader-bar"><div class="loader-fill"></div></div>
     </div>
 
     <div class="scanline"></div>
 
-    <div class="glass-card w-full max-w-xl p-12 rounded-3xl relative overflow-hidden">
+    <div class="glass-card w-full max-w-xl p-12 rounded-3xl relative overflow-hidden z-10">
         <!-- Brand -->
-        <div class="absolute top-8 left-12 flex items-center gap-2">
-            <img src="logo.jpg" class="w-4 h-4 rounded-sm object-cover" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='">
+        <div class="absolute top-8 left-12 flex items-center gap-3">
+            <img src="assets/logo.jpg" alt="Logo" class="w-4 h-4 rounded-sm" style="filter: grayscale(1) invert(1);">
             <span class="mono text-[10px] tracking-[0.3em] uppercase opacity-40">NXT365 Systems</span>
         </div>
 
@@ -226,12 +242,18 @@
 
         // Loader Sequence
         window.addEventListener('load', () => {
+            const logo = document.getElementById('loader-logo');
+            setTimeout(() => {
+                logo.style.opacity = '1';
+            }, 500);
+
             setTimeout(() => {
                 const loader = document.getElementById('preloader');
                 loader.style.opacity = '0';
+                loader.style.transform = 'scale(1.1)';
                 document.body.classList.add('app-loaded');
-                setTimeout(() => loader.style.display = 'none', 1000);
-            }, 2600);
+                setTimeout(() => loader.style.display = 'none', 1500);
+            }, 3200);
         });
 
         // Audio Context for SFX
@@ -313,4 +335,4 @@
         }
     </script>
 </body>
-</html>
+        </html>
