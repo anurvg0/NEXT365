@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NXT365 | Predictive Year Logic</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#080808">
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk5YVDM2NSBQcmVkaWN0aW9uIEVuZ2luZSIsCiAgInNob3J0X25hbWUiOiAiTlhUMzY1IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwODA4MDgiLAogICJ0aGVtZV9jb2xvciI6ICIjMDgwODA4IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAibG9nby5qcGciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL2pwZWciCiAgICB9CiAgXQp9">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #080808;
+            --accent: #ffffff;
+            --subtle: #1a1a1a;
+        }
+
+        /* Anti-Copy Protection */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--accent);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Initial Loader */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .loader-bar {
+            width: 100px;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .loader-fill {
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            background: #fff;
+            animation: load 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
+
+        @keyframes load {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, #0f0f0f, #050505);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .app-loaded .glass-card {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .input-heavy {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--subtle);
+            font-size: 4rem;
+            letter-spacing: -0.05em;
+            width: 100%;
+            text-align: center;
+            outline: none;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            caret-color: #fff;
+        }
+
+        .input-heavy:focus {
+            border-bottom-color: var(--accent);
+            letter-spacing: 0.1em;
+        }
+
+        .step { display: none; opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
+        .step.active { display: flex; opacity: 1; transform: translateY(0); }
+
+        .scanline {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(255,255,255,0.05);
+            top: 0;
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, #444, #fff, #444);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 2s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <!-- Cinematic Loader -->
+    <div id="preloader">
+        <div class="mono text-[10px] tracking-[0.6em] uppercase opacity-40">Initializing NXT365</div>
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+    </div>
+
+    <div class="scanline"></div>
+
+    <div class="glass-card w-full max-w-xl p-12 rounded-3xl relative overflow-hidden">
+        <!-- Brand -->
+        <div class="absolute top-8 left-12 flex items-center gap-2">
+            <img src="logo.jpg" class="w-4 h-4 rounded-sm object-cover" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='">
+            <span class="mono text-[10px] tracking-[0.3em] uppercase opacity-40">NXT365 Systems</span>
+        </div>
+
+        <!-- Signature -->
+        <div class="absolute top-8 right-12">
+            <span class="mono text-[8px] tracking-[0.2em] uppercase opacity-20">By anurvg</span>
+        </div>
+
+        <!-- Step 1: Input -->
+        <div id="step-1" class="step active flex-col items-center">
+            <div class="mb-12 text-center">
+                <h1 class="text-sm uppercase tracking-[0.5em] opacity-50 mb-2">Temporal Base Point</h1>
+                <p class="text-zinc-500 text-xs">Define current epoch to initialize extrapolation.</p>
+            </div>
+            
+            <input type="number" id="year-input" placeholder="0000" class="input-heavy font-light mb-12" onkeypress="handleKey(event)" inputmode="numeric">
+            
+            <button onclick="processPrediction()" class="px-8 py-3 border border-white/20 hover:bg-white hover:text-black transition-all duration-500 text-[10px] uppercase tracking-widest">
+                Calculate Next Cycle
+            </button>
+        </div>
+
+        <!-- Step 2: Processing -->
+        <div id="step-2" class="step flex-col items-center py-20">
+            <div class="relative w-24 h-24 mb-10">
+                <div class="absolute inset-0 border-2 border-white/10 rounded-full"></div>
+                <div id="spinner" class="absolute inset-0 border-t-2 border-white rounded-full animate-spin"></div>
+            </div>
+            <div class="mono text-[10px] uppercase tracking-[0.4em] shimmer-text" id="status-text">
+                Analyzing Arithmetic Strings...
+            </div>
+        </div>
+
+        <!-- Step 3: Result -->
+        <div id="step-3" class="step flex-col items-center">
+            <h1 class="text-sm uppercase tracking-[0.5em] opacity-50 mb-8">Prediction Confirmed</h1>
+            
+            <div class="text-[8rem] font-light leading-none mb-8 tracking-tighter" id="result-year">
+                ----
+            </div>
+
+            <div class="grid grid-cols-2 gap-8 w-full border-t border-white/10 pt-8">
+                <div>
+                    <div class="mono text-[9px] uppercase opacity-40 mb-1">Confidence Score</div>
+                    <div class="text-lg">100.00%</div>
+                </div>
+                <div class="text-right">
+                    <div class="mono text-[9px] uppercase opacity-40 mb-1">Methodology</div>
+                    <div class="text-lg">Increment +1</div>
+                </div>
+            </div>
+
+            <button onclick="reset()" class="mt-12 text-[9px] uppercase tracking-widest opacity-30 hover:opacity-100 transition-opacity">
+                New Calculation
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Disable F12 and keyboard shortcuts for inspection
+        document.onkeydown = function(e) {
+            if(event.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        }
+
+        // Loader Sequence
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loader = document.getElementById('preloader');
+                loader.style.opacity = '0';
+                document.body.classList.add('app-loaded');
+                setTimeout(() => loader.style.display = 'none', 1000);
+            }, 2600);
+        });
+
+        // Audio Context for SFX
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(freq, type, duration, vol) {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter') processPrediction();
+        }
+
+        async function processPrediction() {
+            const input = document.getElementById('year-input');
+            const year = parseInt(input.value);
+
+            if (isNaN(year) || input.value.length < 4) {
+                playSound(150, 'sine', 0.5, 0.2);
+                input.style.borderColor = 'red';
+                setTimeout(() => input.style.borderColor = '', 500);
+                return;
+            }
+
+            playSound(440, 'sine', 0.1, 0.1);
+            showStep(2);
+
+            const statuses = [
+                "Calibrating Temporal Flux...",
+                "Running N+1 Algorithms...",
+                "Synchronizing Calendars...",
+                "Bypassing Reality Constraints...",
+                "Finalizing Prediction..."
+            ];
+
+            for (let status of statuses) {
+                document.getElementById('status-text').innerText = status;
+                playSound(800 + (Math.random() * 200), 'square', 0.05, 0.02);
+                await new Promise(r => setTimeout(r, 600));
+            }
+
+            playSound(880, 'sine', 0.5, 0.1);
+            setTimeout(() => playSound(1100, 'sine', 0.8, 0.05), 100);
+
+            document.getElementById('result-year').innerText = year + 1;
+            showStep(3);
+        }
+
+        function showStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            setTimeout(() => {
+                document.querySelectorAll('.step').forEach(s => s.style.display = 'none');
+                const el = document.getElementById(`step-${n}`);
+                el.style.display = 'flex';
+                setTimeout(() => el.classList.add('active'), 50);
+            }, 500);
+        }
+
+        function reset() {
+            playSound(300, 'sine', 0.2, 0.1);
+            document.getElementById('year-input').value = '';
+            showStep(1);
+        }
+    </script>
+</body>
+</html>
