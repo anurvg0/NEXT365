@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NXT365 | Predictive Year Logic</title>
+    <title>NXT365</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/n.ico">
@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#080808">
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk5YVDM2NSBQcmVkaWN0aW9uIEVuZ2luZSIsCiAgInNob3J0X25hbWUiOiAiTlhUMzY1IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwODA4MDgiLAogICJ0aGVtZV9jb2xvciI6ICIjMDgwODA4Igp9">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk5YVDM2NSIsCiAgInNob3J0X25hbWUiOiAiTlhUMzY1IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwODA4MDgiLAogICJ0aGVtZV9jb2xvciI6ICIjMDgwODA4Igp9">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
@@ -155,6 +155,28 @@
             pointer-events: none;
             z-index: 2;
         }
+
+        .download-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            opacity: 1;
+            letter-spacing: 0.3em;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -172,7 +194,7 @@
         <!-- Brand -->
         <div class="absolute top-8 left-12 flex items-center gap-3">
             <img src="assets/logo.jpg" alt="Logo" class="w-4 h-4 rounded-sm" style="filter: grayscale(1) invert(1);">
-            <span class="mono text-[10px] tracking-[0.3em] uppercase opacity-40">NXT365 Systems</span>
+            <span class="mono text-[10px] tracking-[0.3em] uppercase opacity-40">NXT365</span>
         </div>
 
         <!-- Signature -->
@@ -228,6 +250,12 @@
                 New Calculation
             </button>
         </div>
+    </div>
+
+    <!-- Download Option -->
+    <div class="download-btn mono" onclick="triggerDownload()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download App
     </div>
 
     <script>
@@ -333,6 +361,20 @@
             document.getElementById('year-input').value = '';
             showStep(1);
         }
+
+        function triggerDownload() {
+            playSound(600, 'sine', 0.2, 0.1);
+            // Creating a standalone HTML file of the current page as the "App"
+            const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'NXT365.html';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
     </script>
 </body>
-        </html>
+                </html>
